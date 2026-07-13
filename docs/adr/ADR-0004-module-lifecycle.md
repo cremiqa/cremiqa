@@ -1,132 +1,104 @@
-# ADR-0004 – Module Lifecycle
+# ADR-0004 -- Module Lifecycle
 
-**Status:** Accepted
+## Status
 
-**Date:** 2026-07-13
+Accepted
 
 ## Context
 
-Modules are the implementation units of the Cremiqa platform.
+The Core establishes a deterministic and technology-independent
+lifecycle for every Module before it becomes available to the platform.
 
-The Core is responsible for discovering Modules, validating the system, exposing Capabilities and orchestrating execution.
-
-The platform therefore requires a well-defined lifecycle describing when a Module becomes part of the running system.
+The lifecycle ensures that only Modules satisfying the architectural
+contract are exposed through the Capability Registry.
 
 ## Decision
 
-### Core boot process
+Every Module SHALL progress through the following lifecycle states:
 
-```text
-Scan
-    ↓
-Discovered
-    ↓
-Identified
-```
+1.  Discovered
+2.  Identified
+3.  Validated
+4.  Registered
+5.  Ready
 
-### Module lifecycle
+A Module SHALL NOT skip lifecycle states.
 
-```text
-Identified
-    ↓
-Configured
-    ↓
-Validated
-    ↓
-Initialized
-    ↓
-Ready
-    ↓
-Disposed
-```
+## Lifecycle
 
-The lifecycle represents availability, not operational state.
+### Discovered
 
-### Configured
+The Core discovers a Module implementation.
 
-The Module receives its configuration.
+No assumptions are made beyond the Module's existence.
+
+### Identified
+
+The Core reads the Module metadata.
+
+Identification establishes the Module identity, version and declared
+Capabilities.
 
 ### Validated
 
-The Module validates its own configuration and internal consistency.
+The Core validates that the Module satisfies the architectural contract
+required by the platform.
 
-The Core validates the complete system.
+Validation MAY include:
 
-If validation fails, platform startup fails.
+-   metadata validation
+-   Capability declaration validation
+-   Parameter Contract validation
+-   dependency validation
+-   version compatibility checks
 
-### Initialized
+Validation SHALL NOT inspect or validate the Module's internal
+implementation or business logic.
 
-The Module allocates resources and completes initialization.
+### Registered
 
-Initialization must not perform operational work.
+The Core registers the Module's Capabilities in the Capability Registry.
+
+Only successfully validated Modules MAY be registered.
 
 ### Ready
 
-The Module is fully available.
+The Module is available for Workflow execution.
 
-The Core never interacts with Modules that are not in the Ready state.
-
-Modules declare Capabilities.
-
-The Core discovers and registers declared Capabilities only after a Module reaches the Ready state.
-
-### Disposed
-
-The Module releases its resources.
-
-## Separation of Responsibilities
-
-### Module
-
-- Own implementation
-- Own lifecycle
-- Validate itself
-- Manage internal resources
-- Declare Capabilities
-
-### Core
-
-- Discover Modules
-- Identify Modules
-- Resolve dependencies
-- Validate the system
-- Register Capabilities
-- Execute Workflows
-
-## Alternatives Considered
-
-### Running lifecycle state
-
-Rejected because operational activity belongs to runtime execution.
-
-### Capability registration before Ready
-
-Rejected because partially initialized Modules must never expose Capabilities.
+From this point, the Module is responsible for the execution semantics
+of its exposed Capabilities as defined by ADR-0001.
 
 ## Consequences
 
-- Only Ready Modules participate in the platform.
-- Startup failures occur before runtime execution.
-- Lifecycle remains independent from runtime state.
+### Positive
 
-## Validation
+-   Predictable platform startup.
+-   Stable Capability Registry.
+-   Clear separation between discovery and validation.
+-   Architectural contracts are verified before Modules become
+    available.
 
-**Implementation Status:** Planned
+### Trade-offs
 
-## Related ADRs
+-   Startup includes an explicit validation phase.
+-   Modules cannot participate until lifecycle completion.
 
-- ADR-0000 – Engineering Philosophy
-- ADR-0001 – Core and Module Architecture
-- ADR-0003 – Capability Model
+## Out of Scope
 
-## Key Statement
+Runtime initialization, scheduling, execution model and internal state
+management are implementation concerns and are intentionally outside the
+scope of this ADR.
 
-> A Module becomes part of the platform only after reaching the Ready state.
+## Ownership
 
-Modules declare Capabilities.
+### Defines
 
-The Core discovers and registers them.
+This ADR is the normative source for:
 
-Lifecycle represents availability.
+-   Module Lifecycle
 
-Runtime represents operation.
+### References
+
+-   ADR-0001 -- Core and Module Architecture
+-   ADR-0003 -- Capability Model
+-   ADR-0005 -- Workflow Execution Model

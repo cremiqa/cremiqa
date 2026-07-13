@@ -1,231 +1,144 @@
-# Cremiqa Architecture Glossary
+# Cremiqa Glossary
 
-This glossary defines the common vocabulary used throughout the Cremiqa project.
+This glossary is the normative vocabulary of the Cremiqa architecture.
+Definitions in this document are derived from the accepted ADRs.
 
-Architectural rationale belongs in the corresponding Architecture Decision Records (ADRs). This glossary is the authoritative source for architectural terminology.
-
-## Concept Relationship Map
-
-```text
-Recipe
-    │
-provides values for
-    ▼
-Parameter Contracts
-    ▲
-defined by
-    │
-Tasks
-    ▲
-contained in
-    │
-Workflow
-    │
-requires
-    ▼
-Capabilities
-    ▲
-declared by
-    │
-Modules
-    │
-managed by
-    ▼
-Core
-```
-
----
-
-## Core
-
-The orchestration engine of the platform.
-
-The Core discovers Modules, validates the system, registers Capabilities and executes Workflows.
-
-**See:** ADR-0001, ADR-0004
-
----
-
-## Module
-
-A self-contained unit of responsibility that owns its implementation and lifecycle, and declares one or more Capabilities.
-
-Modules may represent hardware, software, integrations or simulations.
-
-Modules may themselves be composed of other Modules.
-
-**See:** ADR-0001, ADR-0004
-
----
+------------------------------------------------------------------------
 
 ## Capability
 
-A semantic contract describing what the platform can do.
+A semantic contract exposed by a Module.
 
-Capabilities describe **what**, never **how**.
+A Capability defines **what** a Module provides, never **how** it is
+implemented.
 
-Capabilities contain no implementation, configuration or runtime state.
+Every Capability is owned by exactly one Module and defines exactly one
+Parameter Contract.
 
-**See:** ADR-0003
+**Defined by:** ADR-0003
 
----
+------------------------------------------------------------------------
 
-## Workflow
+## Core
 
-A declarative description of behavior expressed as an ordered sequence of Tasks.
+The orchestration component of the platform.
 
-A Workflow defines behavior.
+The Core is responsible for:
 
-A Workflow never depends on concrete Module implementations.
+-   Module discovery
+-   Module validation
+-   Module lifecycle management
+-   Capability Registry management
+-   Workflow execution
+-   Capability resolution
 
-**See:** ADR-0005
+The Core never performs machine-specific behaviour.
 
----
+**Defined by:** ADR-0001
 
-## Task
+------------------------------------------------------------------------
 
-The smallest declarative unit of behavior within a Workflow.
+## Module
 
-A Task defines:
+The smallest autonomous architectural unit responsible for fulfilling
+one complete responsibility.
 
-- the required Capability
-- a Parameter Contract
+A Module owns:
 
-A Task describes what must happen.
+-   its internal state
+-   its implementation
+-   its execution semantics
+-   its resources
+-   scheduling
+-   timing
+-   concurrency
 
-It never specifies how the action is implemented.
+A Module encapsulates all implementation details required to fulfill its
+responsibility.
 
-**See:** ADR-0005
+**Defined by:** ADR-0001
 
----
+------------------------------------------------------------------------
 
 ## Parameter Contract
 
-A contract defined by a Task describing the data required for its execution.
+The specification of the parameters required to execute a Capability.
 
-The structure of a Parameter Contract is defined by platform specifications rather than ADRs.
+A Parameter Contract is defined by a Capability and satisfied by a Task
+during Workflow execution.
 
-**See:** ADR-0005
+**Defined by:** ADR-0003 / ADR-0005
 
----
+------------------------------------------------------------------------
 
 ## Recipe
 
-A declarative description of the data required to execute a Workflow.
+A data object that selects a Workflow and provides parameter values for
+its Tasks.
 
-A Recipe:
+A Recipe contains data only.
 
-- selects a Workflow
-- provides parameter values
+It never defines behaviour.
 
-Recipes contain data only.
+**Defined by:** ADR-0005
 
-Behavior belongs to Workflows.
-
-**See:** ADR-0005
-
----
-
-## Workflow Compatibility
-
-The ability to execute a Workflow using the currently available Capabilities.
-
-Compatibility is determined by Capabilities rather than machine models.
-
-**See:** ADR-0005
-
----
-
-## Availability
-
-The state indicating whether a Module is ready to participate in the platform.
-
-Availability is defined by the Module Lifecycle and is independent from runtime operation.
-
-**See:** ADR-0004
-
----
-
-## Runtime State
-
-The current operational state of a Module while executing Workflows.
-
-Runtime State is independent from the Module Lifecycle.
-
-**See:** ADR-0004
-
----
-
-## Core Boot Process
-
-The sequence executed by the Core before the platform becomes operational.
-
-It includes Module discovery, identification, configuration orchestration, validation and Capability registration.
-
-**See:** ADR-0004
-
----
-
-## Machine
-
-A physical or virtual coffee machine represented by one or more Modules.
-
----
-
-## Platform
-
-The complete Cremiqa ecosystem consisting of the Core, Modules, Capabilities, Workflows, Recipes and supporting infrastructure.
-
----
-
-## Implementation
-
-The concrete realization of a Capability provided by a Module.
-
----
-
-## Semantic Contract
-
-A stable architectural concept describing meaning rather than implementation.
-
-Capabilities are semantic contracts.
-
-**See:** ADR-0003
-
----
+------------------------------------------------------------------------
 
 ## Responsibility
 
-A well-defined concern owned by exactly one Module.
+A cohesive business concern fulfilled by a Module.
 
----
+Responsibilities define Module boundaries.
 
-## Composition
+**Defined by:** ADR-0001
 
-The practice of building larger Modules from smaller Modules.
+------------------------------------------------------------------------
 
-Composition is preferred over specialization whenever possible.
+## Task
 
-**See:** ADR-0000
+The smallest declarative unit of behaviour within a Workflow.
 
----
+A Task references a Capability and provides values satisfying its
+Parameter Contract.
 
-## Platform Vocabulary
+A Task defines what must happen, never how.
 
-The collection of all Capability definitions understood by the platform.
+**Defined by:** ADR-0005
 
----
+------------------------------------------------------------------------
 
-## Reserved Terms
+## Workflow
 
-The following terms have precise architectural meanings within the Cremiqa project and should not be used interchangeably:
+A declarative description of behaviour expressed as an ordered sequence
+of Tasks.
 
-- Core
-- Module
-- Capability
-- Workflow
-- Task
-- Parameter Contract
-- Recipe
-- Implementation
-- Responsibility
+A Workflow defines what shall happen and in which order.
+
+It remains independent from machine and Module implementations.
+
+**Defined by:** ADR-0005
+
+------------------------------------------------------------------------
+
+# Non-normative Notes
+
+The following terms intentionally have no architectural definitions
+because they are implementation details:
+
+-   Driver
+-   Sensor
+-   Actuator
+-   Pump
+-   Boiler
+-   Heater
+-   GPIO
+-   Relay
+-   PID controller
+-   State machine
+-   Scheduler
+-   Queue
+-   Thread
+-   Actor
+
+These concepts may exist inside Module implementations but are not
+architectural building blocks of the Cremiqa platform.

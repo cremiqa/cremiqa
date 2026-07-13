@@ -1,76 +1,108 @@
-# ADR-0002 – Repository Evolution Strategy
+# ADR-0002 -- Repository Evolution Strategy
 
-**Status:** Accepted
+## Status
 
-**Date:** 2026-07-12
+Accepted
+
+## Date
+
+2026-07-12
 
 ## Context
 
-Cremiqa is designed as a modular platform that is expected to grow over time. Repository boundaries and architectural boundaries intentionally remain independent.
+Cremiqa is designed as a modular platform that is expected to evolve
+over time.
+
+Repository boundaries and architectural boundaries intentionally remain
+independent.
 
 ## Decision
 
-### Cremiqa uses a monorepository.
+### Architecture comes first
+
+Architectural boundaries SHALL NOT be influenced by repository
+boundaries.
+
+Repository layout is an organizational concern and SHALL remain
+independent from the architectural model defined by ADR-0001.
+
+### Cremiqa uses a monorepository
 
 All first-party project artifacts live in a single Git repository.
 
 This includes:
 
-- Core
-- Modules
-- Documentation
-- Tools
-- Examples
-- Tests
+-   Core
+-   Modules
+-   Documentation
+-   Tools
+-   Examples
+-   Tests
 
-### Modularity is an architectural concern.
+### Modules are developed in the monorepository
 
-Repository boundaries must **not** define architectural boundaries.
+Every first-party Module is initially developed inside the main
+repository.
 
-Modules are architectural building blocks.
+### Repository extraction is an optimization
 
-Repositories are organizational units.
+A Module MAY be extracted into its own repository once it demonstrates
+an independent development lifecycle and the benefits outweigh the
+operational cost.
 
-### Modules live inside the monorepo by default.
-
-Every new Module starts its lifecycle inside the main repository.
-
-### Repository extraction is an optimization.
-
-A Module may become its own repository only after demonstrating an independent lifecycle.
+The extraction decision SHALL NOT require architectural changes.
 
 ### Design for tomorrow. Build for today.
 
-The repository structure is intentionally optimized for today's needs while allowing future extraction without architectural changes.
-
-### Architecture always comes first.
-
-The architecture must never be compromised to match the repository layout.
+The repository strategy is optimized for the current stage of the
+project while preserving future flexibility.
 
 ## Alternatives Considered
 
-- Separate repository for every Module — rejected due to unnecessary operational overhead.
-- Separate repositories for Core and Modules — rejected because coordinated evolution is expected during the early phases.
-- Monorepository — selected.
+### Separate repository for every Module
+
+Rejected due to unnecessary operational overhead during the early stages
+of the project.
+
+### Separate repositories for Core and Modules
+
+Rejected because coordinated evolution is expected during the foundation
+phase.
+
+### Monorepository
+
+Accepted.
 
 ## Consequences
 
-- Single source of truth.
-- Unified versioning.
-- Simpler onboarding.
-- Future extraction remains possible.
+### Positive
 
-## Validation
+-   Single source of truth.
+-   Unified versioning.
+-   Simplified onboarding.
+-   Easier cross-module refactoring.
+-   Future repository extraction remains possible.
 
-**Implementation Status:** Planned
+### Trade-offs
 
-This decision will be considered validated only after the project has evolved long enough to demonstrate that the monorepo strategy continues to support development effectively.
+-   Larger repository.
+-   Shared CI/CD pipeline.
+-   Repository history grows over time.
 
-## Related ADRs
+## Review
 
-- ADR-0000 – Engineering Philosophy
-- ADR-0001 – Core and Module Architecture
+This decision SHOULD be revisited only when repository extraction
+becomes justified by organizational or technical needs.
 
-## Future Revisions
+## Ownership
 
-Revisit this ADR only when repository extraction becomes justified by organizational or technical needs.
+### Defines
+
+This ADR is the normative source for:
+
+-   Repository strategy
+
+### References
+
+-   ADR-0000 -- Engineering Philosophy
+-   ADR-0001 -- Core and Module Architecture

@@ -1,64 +1,114 @@
-# ADR-0003 – Capability Model
+# ADR-0003 -- Capability Model
 
-**Status:** Accepted
+## Status
 
-**Date:** 2026-07-13
+Accepted
 
 ## Context
 
-The platform requires a stable abstraction independent from concrete implementations.
+Workflows must remain independent from machine implementations.
+
+The platform therefore requires a stable semantic contract between
+Workflow Tasks and Modules.
 
 ## Decision
 
-### A Capability is a semantic contract.
+### Capability
 
-A Capability describes what the platform can do, never how it is implemented.
+A Capability is a semantic contract exposed by a Module.
 
-Capabilities form the common vocabulary of the platform.
+A Capability describes **what** a Module provides, never **how** the
+responsibility is implemented.
 
-### Modules publish Capabilities.
+Examples include:
 
-A Module may publish one or more Capabilities.
+-   Heat
+-   Extract
+-   Grind
+-   Steam
+-   Clean
 
-Different Modules may publish the same Capability.
+### Module relationship
 
-### Workflows consume Capabilities.
+Every Capability is owned by exactly one Module.
 
-Workflows never depend on concrete Modules.
+A Module MAY expose one or more Capabilities.
 
-### Capabilities are immutable.
+Capabilities expose responsibilities implemented by the owning Module as
+defined by ADR-0001.
 
-Capabilities do not contain implementation, configuration or runtime state.
+Capabilities SHALL NOT expose implementation details.
 
-## Alternatives Considered
+### Implementation independence
 
-- Capability as an object — rejected.
-- Capability as an interface — rejected.
-- Capability as a semantic contract — selected.
+Capabilities SHALL NOT represent:
+
+-   hardware devices
+-   drivers
+-   sensors
+-   actuators
+-   GPIO
+-   relays
+-   control algorithms
+-   other implementation details
+
+Examples of invalid Capabilities include:
+
+-   ReadTemperature
+-   EnablePump
+-   GPIO17
+-   BoilerRelay
+
+### Workflow interaction
+
+Workflow Tasks reference Capabilities.
+
+The Core resolves the Capability referenced by each Workflow Task
+through the Capability Registry.
+
+The Workflow remains unaware of the owning Module implementation.
+
+### Parameter Contract
+
+Every Capability defines exactly one Parameter Contract.
+
+The Parameter Contract describes the parameters required to execute the
+Capability.
+
+Workflow Tasks provide parameter values that satisfy the corresponding
+Parameter Contract.
+
+Capability names SHALL NOT encode parameters.
 
 ## Consequences
 
-- Machine-independent Workflows.
-- Portable Recipes.
-- Stable platform vocabulary.
+### Positive
 
-## Validation
+-   Stable semantic platform API.
+-   Hardware-independent Workflows.
+-   Clear separation between architecture and implementation.
+-   Modules may evolve internally without affecting Workflows.
 
-**Implementation Status:** Planned
+### Trade-offs
 
-This decision will be validated once multiple independent Module implementations execute identical Workflows using shared Capabilities.
+-   Capability design requires careful modelling.
+-   Poorly named Capabilities may leak implementation concepts into the
+    platform.
 
-## Related ADRs
+## Out of Scope
 
-- ADR-0000 – Engineering Philosophy
-- ADR-0001 – Core and Module Architecture
+Execution semantics, scheduling, concurrency and resource ownership
+belong to the owning Module and are defined by ADR-0001.
 
-## Key Statement
+## Ownership
 
-> Capabilities describe what the platform can do—not how it does it.
+### Defines
 
-Modules publish Capabilities.
+This ADR is the normative source for:
 
-The Core discovers them.
+-   Capability
 
-Workflows consume them.
+### References
+
+-   ADR-0001 -- Core and Module Architecture
+-   ADR-0005 -- Workflow Execution Model
